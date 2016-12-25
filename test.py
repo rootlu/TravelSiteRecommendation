@@ -46,8 +46,17 @@ import re
 # for (departure, departure_url) in test_dict.items():
 #     print departure_url
 
-dep_des_url = {'hangzhou': {'shanghai': 'http://www.tuniu.com/guide/d-dali-3306/?pcat=82'},
-               'hangzhou1': {'shanghai1': 'http://www.tuniu.com/guide/d-dali-3306/?pcat=821'}}
-for dep_item, des_url_dict_item in dep_des_url.items():
-    for des_item, url_item in des_url_dict_item.items():
-        print url_item
+# dep_des_url = {'hangzhou': {'shanghai': 'http://www.tuniu.com/guide/d-dali-3306/?pcat=82'},
+#                'hangzhou1': {'shanghai1': 'http://www.tuniu.com/guide/d-dali-3306/?pcat=821'}}
+# for dep_item, des_url_dict_item in dep_des_url.items():
+#     for des_item, url_item in des_url_dict_item.items():
+#         print url_item
+
+detail_url_regex = re.compile(r'http://www\.tuniu\.com/(?:tour|tours)/(?P<route_id>\d{9})')
+detail_url_ret = detail_url_regex.findall('<link rel="stylesheet" type="text/css" href="http://www.tuniu.com/tour/201610182/common/fil</title>')
+print detail_url_ret
+detail_url_set = set(item for item in detail_url_ret)
+for item in detail_url_set:
+    print item
+    url = 'http://www.tuniu.com/tour/'+item
+    print url
