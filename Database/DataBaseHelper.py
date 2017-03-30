@@ -38,6 +38,10 @@ class DataBaseHelper:
         self.cursor.execute("create index if not exists departureindex on routedep(departure)")
 
         self.cursor.execute("create table if not exists routecom(urlid integer, outline varchar,detail varchar primary key)")
+        self.cursor.execute("create index if not exists detailindex on routecom(detail)")
+
+        self.cursor.execute("create table if not exists routeerrorurl(errorurl varchar primary key)")
+        self.cursor.execute("create index if not exists errorurlindex on routeerrorurl(errorurl)")
 
         self.database.commit()
 
@@ -47,7 +51,7 @@ class DataBaseHelper:
         :param table_name:数据库表名
         :param file_id: 记录名
         :param value: 记录值
-        :return: 若存在，返回第一条记录，否则返回False
+        :return: 若存在，返回第一条记录，否则返回None
         """
         command = "select rowid from %s where %s = '%s'" % (table_name, file_id, value)
         self.cursor.execute(command)
@@ -95,14 +99,15 @@ class DataBaseHelper:
         :return:
         """
         if self.is_exist('routeinfo', 'urlid', urlid) is not None:  # 数据存在，更新数据
-            command = "update routeinfo set title = '%s', satisfaction = %d, summary = '%s', text = '%s' where urlid=%d" \
-                      % (title, satisfaction, summary, text, urlid)
-            print 'Update routeinfo %d' % urlid
+            print 'Exist routeinfo: %s' % urlid
+            # command = "update routeinfo set title = '%s', satisfaction = %d, summary = '%s', text = '%s' where urlid=%d" \
+            #           % (title, satisfaction, summary, text, urlid)
+            # print 'Update routeinfo %d' % urlid
         else:
             command = "insert into routeinfo(urlid, title, satisfaction, summary, text) values(%d, '%s', %d, '%s', '%s')" % (urlid, title, satisfaction, summary, text)
             print 'Insert routeinfo %d' % urlid
-        self.cursor.execute(command)
-        self.database.commit()
+            self.cursor.execute(command)
+            self.database.commit()
 
     def insert_into_routecom(self, urlid, outline, detail):
         """
@@ -113,14 +118,15 @@ class DataBaseHelper:
         :return:
         """
         if self.is_exist('routecom', 'detail', detail) is not None:  # 数据存在，更新数据
-            command = "update routecom set urlid = %d, outline = '%s' where detail= '%s'" \
-                      % (urlid, outline, detail)
-            print 'Update routecom %d' % urlid
+            print 'Exist routecom: %s' % urlid
+            # command = "update routecom set urlid = %d, outline = '%s' where detail= '%s'" \
+            #           % (urlid, outline, detail)
+            # print 'Update routecom %d' % urlid
         else:
             command = "insert into routecom(urlid, outline, detail) values(%d, '%s', '%s')" % (urlid, outline, detail)
             print 'Insert routecom %d' % urlid
-        self.cursor.execute(command)
-        self.database.commit()
+            self.cursor.execute(command)
+            self.database.commit()
 
     def insert_into_routedep(self, urlid, departure, price):
         """
@@ -133,27 +139,67 @@ class DataBaseHelper:
         exist_command = "select rowid from routedep where urlid=%d and departure='%s'" % (urlid, departure)
         self.cursor.execute(exist_command)
         if self.cursor.fetchone() is not None:  # 数据存在，更新数据
-            command = "update routedep set price = %d where urlid=%d and departure='%s'" % (price, urlid, departure)
-            print 'Update routedep %d' % urlid
+            print 'Exist routedep: %s' % urlid
+            # command = "update routedep set price = %d where urlid=%d and departure='%s'" % (price, urlid, departure)
+            # print 'Update routedep %d' % urlid
         else:
             command = "insert into routedep(urlid, departure, price) values(%d, '%s', %d)" % (urlid, departure, price)
             print 'Insert routedep %d' % urlid
-        self.cursor.execute(command)
-        self.database.commit()
+            self.cursor.execute(command)
+            self.database.commit()
 
-    def select_all(self, table_name):
+    def insert_into_routeerrorurl(self, url):
+        """
+        插入请求出错的url到数据表errorurl
+        :param url:
+        :return:
+        """
+        if self.is_exist('routeerrorurl', 'errorurl', url) is None:  # 数据不存在插入
+            command = "insert into routeerrorurl(errorurl) values('%s')" % url
+            self.cursor.execute(command)
+            self.database.commit()
+
+    # def select_all(self, table_name):
+    #     """
+    #     获取数据表数据
+    #     :param table_name:
+    #     :return: 返回查询结果列表
+    #     """
+    #     command = 'select * from %s' % table_name
+    #     self.cursor.execute(command)
+    #     result_list = self.cursor.fetchall()
+    #     return result_list
+
+    def select_all_data(self, table_name, file_id):
         """
         获取数据表数据
         :param table_name:
-        :return: 返回查询结果列表
+        :param file_id: 'ALL'表示查询数据表的所有数据，否则表示查询某一列数据
+        :return:
         """
-        command = 'select * from %s' % table_name
+        if file_id == 'ALL':
+            command = 'select * from %s' % table_name
+        else:
+            command = 'select %s from %s' % (file_id, table_name)
         self.cursor.execute(command)
         result_list = self.cursor.fetchall()
-        url_list = []
-        for item in result_list:
-            url_list.append(item[0])
-        return url_list
+        return result_list
+
+    def select_one_data(self, file_name1, table_name, file_name2, value):
+        command = "select %s from %s where %s = '%s'" % (file_name1, table_name, file_name2, value)
+        self.cursor.execute(command)
+        result_list = self.cursor.fetchall()
+        return result_list
+
+    def get_table_count(self, table_name):
+        """
+        获取表长度
+        :param table_name:
+        :return:
+        """
+        command = 'select count(*) from %s' % table_name
+        self.cursor.execute(command)
+        return self.cursor.fetchone()[0]
 
     # def insert_into_db(self, table_name, record_dict):
     #     """

@@ -8,16 +8,17 @@ import HTMLParser
 import json
 import sqlite3
 
-# headers = {
-#     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.80 Safari/537.36'
-# }
-# request = urllib2.Request('http://www.tuniu.com/tours/210426545', headers=headers)
-# response = urllib2.urlopen(request)  # 超时设置
-# result = response.read()
-# with open('test.html', 'w') as f:
-#     f.write(result)
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.80 Safari/537.36'
+}
+request = urllib2.Request('http://vacations.ctrip.com/tours/d-sanfrancisco-249', headers=headers)
+response = urllib2.urlopen(request)  # 超时设置
+result = response.read()
+with open('test.html', 'w') as f:
+    f.write(result)
 
 # comment_url = 'http://www.tuniu.com/papi/product/remarkList?refresh=1&productId=210051158&productType=1&page=1'   
+# result = ''
 # comment_json = json.loads(result)
 # print comment_json['data']['totalPages']
 
@@ -25,7 +26,7 @@ import sqlite3
 # tag_summary = soup.find('div', attrs={'class': 'resource-section-content-inner'})
 # # print tag_summary
 # print re.sub(r'\n+|\t+|\s+|\r', '', tag_summary.get_text()) if tag_summary is not None else None
-
+#
 
 # script_regex = re.compile(r'window\.pageData[\S\s]+?departCityInfo":(?P<route_departure>.*?),"backCityInfo', re.M)
 # script_ret = script_regex.search(result)
@@ -43,10 +44,10 @@ import sqlite3
 # print title
 #
 # tag_grade_list = soup.find_all('a', attrs={'class': 'resource-statisfaction-number'})
-# print tag_grade_list[0].get_text()[:-1] if tag_grade_list is not None else 0
+# print tag_grade_list[0].get_text(strip=True)[:-1] if tag_grade_list is not None else 0
 #
 # tag_detail_list = soup.find_all('div', attrs={'class': 'detail-sections'})
-# print re.sub(r'\n+|\t+|\s+|\r', '', tag_detail_list[0].get_text().strip())
+# print re.sub(r'\n+|\t+|\s+|\r', '', tag_detail_list[0].get_text(strip=True))
 
 # url = 'http://www.tuniu.com/tour/210051158'
 # route_id = url[-9:]
@@ -75,6 +76,11 @@ import sqlite3
 # detail_url_set = set(item for item in detail_url_ret)
 # print len(detail_url_set)
 # print detail_url_set
+
+xiecheng_detail_url_regex = re.compile(r'<a href="(?P<route_url>http://vacations.ctrip.com/(?:grouptravel|freetravel)/p\w+\.html[\S\s]+?)"')
+detail_url_ret = xiecheng_detail_url_regex.findall(result)
+detail_url_set = set(item for item in detail_url_ret)
+print detail_url_set
 
 # soup = BeautifulSoup(str(div_list[0]), 'html5lib')
 # test_dict = {}
@@ -124,7 +130,12 @@ import sqlite3
 #     url_list.append(item[0])
 # print url_list
 # print result[0] if result is not None else None
-
-num = 5
-for i in range(num):
-    print i+1
+# route_info = {'sad':'sdsd\'ssdd', 'sd':'123'}
+# for i in route_info:
+#     route_info[i] = route_info[i].replace('\'', '\"')
+# print route_info
+# url = 'http://www.tuniu.com/papi/product/remarkList?refresh=1&productId=213123123&productType=1&page='
+# route_id_regex = re.compile(r'^http\S*?productId=(?P<route_id>\d{9})')
+# route_id_ret = route_id_regex.search(url)
+# error_url = 'http://www.tuniu.com/tour/' + route_id_ret.group('route_id')
+# print error_url
